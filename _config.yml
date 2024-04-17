@@ -8,7 +8,7 @@ markdown: kramdown
 tracking_id: #
 
 footer: yes
-footer_url: "github.com/dendroenydris"
+footer_url: "https://github.com/dendroenydris"
 footer_text: "dendroenydris 2024"
 
 sass:
