@@ -8,7 +8,7 @@ layout: default
 
 Hi! I am a master student majoring in Computer Science at TU berlin.
 
-## Research Interest
+## Research Ijenterest
 
 - Explainable ML
 - Probabilitics ML
