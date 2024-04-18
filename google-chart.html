@@ -5,8 +5,6 @@
       // Load the Visualization API and the geochart package.
       google.charts.load('current', {
         'packages':['geochart'],
-        // Note: you will need to get a mapsApiKey for your project.
-        // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
         'mapsApiKey': 'AIzaSyBcthrNRW03wPUBu912Zq9Hru5p0kc9eHg'
       });
       // Set a callback to run when the Google Visualization API is loaded.
@@ -20,7 +18,7 @@
       
         fetch(proxyUrl, {
           headers: {
-            'X-Requested-With': 'XMLHttpRequest' // Some CORS proxies use this header
+            'X-Requested-With': 'XMLHttpRequest'
           }
         })
           .then(response => response.text())
@@ -43,8 +41,8 @@
             var options = {
               colorAxis: {
                 colors: ['#e7eff6', '#02386f'], // light blue to dark blue
-                minValue: 3,   // assuming 'Ladder score' minimum is 3
-                maxValue: 8    // assuming 'Ladder score' maximum is 8
+                minValue: 3,  
+                maxValue: 8   
               }
             };
 
@@ -56,10 +54,7 @@
 
       // Helper function to transform CSV to an array of objects (one per row)
       function csvToArray(str, delimiter = ',') {
-        // Slice from start of data to the end of data
-        // Split the rows at every new line
         const rows = str.split('\n');
-        // Map every row to an array splitted by delimiter
         return rows.map(row => {
           const values = row.split(delimiter);
           const el = values.reduce((object, curr, i) => {
@@ -106,27 +101,23 @@
           data.addColumn('string', 'Parent');
           data.addColumn('string', 'ToolTip');
 
-          // The data for our U-Net-like structure
+
           var uNetData = [
-              // Nodes for the contraction path
               [{'v':'input', 'f':'Input'}, '', 'Input Layer'],
               ['conv1', 'input', 'Conv Block'],
               ['conv2', 'conv1', 'Conv Block'],
               ['conv3', 'conv2', 'Conv Block'],
               ['conv4', 'conv3', 'Conv Block'],
 
-              // Nodes for the expansion path
               ['up1', 'conv4', 'Conv Block + Up'],
               ['up2', 'up1', 'Conv Block + Up'],
               ['up3', 'up2', 'Conv Block + Up'],
               ['up4', 'up3', 'Conv Block + Up'],
 
-              // Connecting expansions with the corresponding contractions
               ['concat1', 'conv3', 'Concatenation'],
               ['concat2', 'conv2', 'Concatenation'],
               ['concat3', 'conv1', 'Concatenation'],
 
-              // Output
               [{'v':'output', 'f':'Output'}, 'up4', 'Output Layer'],
           ];
 
@@ -135,12 +126,11 @@
               data.addRows([node]);
           });
 
-          // Additional options for the chart
+          // chart
           var options = {
               allowHtml: true
           };
 
-          // Draw the chart
           var chart = new google.visualization.OrgChart(document.getElementById('u_net_chart'));
           chart.draw(data, options);
       }
@@ -148,12 +138,10 @@
   </head>
 
   <body>
-    <!-- Chart #1 with title -->
     <h2>World Happiness Report</h2>
     <div id="regions_div" style="width: 900px; height: 500px;"></div>
 
-    <!-- Chart #2 with title -->
-    <h2>u_net</h2>
+    <h2>U-Net</h2>
     <div id="u_net_chart" style="width: 900px; height: 500px;"></div>
   </body>
 </html>
