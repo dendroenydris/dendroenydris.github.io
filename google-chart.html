@@ -14,15 +14,24 @@
 
       function drawRegionsMap() {
         // Fetch the CSV data
-        fetch('https://github.com/dendroenydris/dendroenydris.github.io/WHR2024.csv')
+        const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+        const csvUrl = 'https://raw.githubusercontent.com/dendroenydris/dendroenydris.github.io/gh-pages/WHR2024.csv';
+        const proxyUrl = corsProxy + csvUrl;
+      
+        fetch(proxyUrl, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest' // Some CORS proxies use this header
+          }
+        })
           .then(response => response.text())
           .then(csv => {
             // Convert CSV to array of objects
             var arrayData = csvToArray(csv);
+
             // Prepare DataTable
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Country'); // Country name
-            data.addColumn('number', 'Ladder Score'); // Ladder score
+            data.addColumn('string', 'Country name'); // Country name
+            data.addColumn('number', 'Ladder score'); // Ladder score
             
             // Map CSV data to geo chart format
             var rows = arrayData.map(function (row) {
@@ -30,10 +39,13 @@
             });
 
             data.addRows(rows);
-
             // Set chart options
             var options = {
-              colorAxis: {colors: ['#e7eff6', '#02386f']} // light blue to dark blue
+              colorAxis: {
+                colors: ['#e7eff6', '#02386f'], // light blue to dark blue
+                minValue: 3,   // assuming 'Ladder score' minimum is 3
+                maxValue: 8    // assuming 'Ladder score' maximum is 8
+              }
             };
 
             // Instantiate and draw the chart.
@@ -46,7 +58,7 @@
       function csvToArray(str, delimiter = ',') {
         // Slice from start of data to the end of data
         // Split the rows at every new line
-        const rows = str.slice(str.indexOf('\n') + 1).split('\n');
+        const rows = str.split('\n');
         // Map every row to an array splitted by delimiter
         return rows.map(row => {
           const values = row.split(delimiter);
@@ -57,11 +69,91 @@
           return el;
         });
       }
+
+
+      google.charts.load('current', {packages:["orgchart"]});
+      google.charts.setOnLoadCallback(drawChart);
+  
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Layer');
+        data.addColumn('string', 'Parent');
+        data.addRows([
+          ['Input Layer', ''],
+          ['Convolutional Layer 1', 'Input Layer'],
+          ['Pooling Layer 1', 'Convolutional Layer 1'],
+          ['Convolutional Layer 2', 'Pooling Layer 1'],
+          ['Pooling Layer 2', 'Convolutional Layer 2'],
+          ['Fully Connected Layer', 'Pooling Layer 2'],
+          ['Output Layer', 'Fully Connected Layer']
+        ]);
+  
+        var options = {
+          allowHtml:true
+        };
+  
+        var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+
+
+      google.charts.load('current', {packages:['orgchart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+          var data = new google.visualization.DataTable();
+          data.addColumn('string', 'Node');
+          data.addColumn('string', 'Parent');
+          data.addColumn('string', 'ToolTip');
+
+          // The data for our U-Net-like structure
+          var uNetData = [
+              // Nodes for the contraction path
+              [{'v':'input', 'f':'Input'}, '', 'Input Layer'],
+              ['conv1', 'input', 'Conv Block'],
+              ['conv2', 'conv1', 'Conv Block'],
+              ['conv3', 'conv2', 'Conv Block'],
+              ['conv4', 'conv3', 'Conv Block'],
+
+              // Nodes for the expansion path
+              ['up1', 'conv4', 'Conv Block + Up'],
+              ['up2', 'up1', 'Conv Block + Up'],
+              ['up3', 'up2', 'Conv Block + Up'],
+              ['up4', 'up3', 'Conv Block + Up'],
+
+              // Connecting expansions with the corresponding contractions
+              ['concat1', 'conv3', 'Concatenation'],
+              ['concat2', 'conv2', 'Concatenation'],
+              ['concat3', 'conv1', 'Concatenation'],
+
+              // Output
+              [{'v':'output', 'f':'Output'}, 'up4', 'Output Layer'],
+          ];
+
+          // Add U-Net connections
+          uNetData.forEach(function(node) {
+              data.addRows([node]);
+          });
+
+          // Additional options for the chart
+          var options = {
+              allowHtml: true
+          };
+
+          // Draw the chart
+          var chart = new google.visualization.OrgChart(document.getElementById('u_net_chart'));
+          chart.draw(data, options);
+      }
     </script>
   </head>
 
   <body>
-    <!--Div that will hold the geo chart-->
+    <!-- Chart #1 with title -->
+    <h2>World Happiness Report</h2>
     <div id="regions_div" style="width: 900px; height: 500px;"></div>
+
+    <!-- Chart #2 with title -->
+    <h2>u_net</h2>
+    <div id="u_net_chart" style="width: 900px; height: 500px;"></div>
   </body>
 </html>
